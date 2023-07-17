@@ -12,18 +12,20 @@ y_train = train_df['Close']
 
 def build_model(hp):
     model = keras.Sequential()
-    for i in range(hp.Int('num_layers', 2, 20)):
-        model.add(layers.Dense(units=hp.Int('units_' + str(i),
-                                            min_value=32,
-                                            max_value=512,
-                                            step=32),
-                               activation='relu'))
-    model.add(layers.Dense(1, activation='linear'))
+    model.add(layers.Dense(units=hp.Int('units_1', min_value=64, max_value=256, step=32), activation='relu', input_shape=(X_train.shape[1],)))
+    model.add(layers.Dropout(hp.Float('dropout_1', min_value=0.1, max_value=0.5, step=0.1)))
+    
+    for i in range(hp.Int('num_layers', 1, 3)):
+        model.add(layers.Dense(units=hp.Int('units_' + str(i+2), min_value=64, max_value=256, step=32), activation='relu'))
+        model.add(layers.Dropout(hp.Float('dropout_' + str(i+2), min_value=0.1, max_value=0.5, step=0.1)))
+    
+    model.add(layers.Dense(1))
+    
     model.compile(
-        optimizer=keras.optimizers.Adam(
-            hp.Choice('learning_rate', [1e-2, 1e-3, 1e-4])),
+        optimizer=keras.optimizers.Adam(hp.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])),
         loss='mean_squared_error',
         metrics=['mean_squared_error'])
+    
     return model
 
 tuner = RandomSearch(
@@ -37,7 +39,7 @@ tuner = RandomSearch(
 tuner.search_space_summary()
 
 tuner.search(X_train, y_train,
-             epochs=5,
+             epochs=50,
              validation_data=(X_val, y_val))
 
 tuner.results_summary()

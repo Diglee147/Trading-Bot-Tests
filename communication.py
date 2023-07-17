@@ -1,17 +1,23 @@
-import time
-import json
+import os
 
+# Define o caminho do arquivo compartilhado
+shared_file_path = "shared_file.txt"
+
+# Função para enviar dados para o MQL4
 def send_data_to_mql(data):
-    with open('communication.json', 'w') as f:
-        json.dump(data, f)
+    with open(shared_file_path, "w") as file:
+        file.write(data)
 
+# Função para receber dados do MQL4
 def receive_data_from_mql():
-    with open('communication.json', 'r') as f:
-        data = json.load(f)
+    with open(shared_file_path, "r") as file:
+        data = file.read()
     return data
 
 # Exemplo de uso
-send_data_to_mql({'command': 'buy', 'symbol': 'EURUSD', 'volume': 0.01})
-time.sleep(1)  # Espera um pouco para o MQL4 ter tempo para ler o arquivo
-response = receive_data_from_mql()
-print(response)
+data_to_send = "Hello MQL4!"
+send_data_to_mql(data_to_send)
+
+# Aguarda a resposta do MQL4
+response_from_mql = receive_data_from_mql()
+print("Response from MQL4:", response_from_mql)

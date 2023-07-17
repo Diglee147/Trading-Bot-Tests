@@ -1,20 +1,70 @@
-string json_file_path = "C:\\Users\\YourUsername\\PathToYourPythonScript\\communication.json";
+//+------------------------------------------------------------------+
+//|                                                communication.mq4 |
+//|                                                      Copyright 2023 |
+//|                                                      OpenAI          |
+//+------------------------------------------------------------------+
 
-void OnStart() {
-    while (true) {
-        string json_content = FileReadText(json_file_path);
-        if (json_content != "") {
-            // Processa o conteúdo do JSON aqui
-            // Por exemplo, se o JSON contém um comando para comprar, então execute uma ordem de compra
+// Define o caminho do arquivo compartilhado
+#property define FILE_PATH "shared_file.txt"
 
-            // Depois de processar o JSON, você pode escrever uma resposta no mesmo arquivo
-            FileDelete(json_file_path);  // Primeiro, exclua o arquivo antigo
-            int file_handle = FileOpen(json_file_path, FILE_WRITE|FILE_TXT|FILE_ANSI);
-            if (file_handle != INVALID_HANDLE) {
-                FileWrite(file_handle, "{\"response\": \"success\"}");
-                FileClose(file_handle);
-            }
-        }
-        Sleep(1000);  // Dorme por um segundo
+// Função para enviar dados para o Python
+void SendDataToPython(string data)
+{
+    int file_handle = FileOpen(FILE_PATH, FILE_WRITE);
+    if (file_handle != INVALID_HANDLE)
+    {
+        FileWriteString(file_handle, data);
+        FileClose(file_handle);
     }
+}
+
+// Função para receber dados do Python
+string ReceiveDataFromPython()
+{
+    string data = "";
+    int file_handle = FileOpen(FILE_PATH, FILE_READ);
+    if (file_handle != INVALID_HANDLE)
+    {
+        int file_size = FileSize(file_handle);
+        if (file_size > 0)
+        {
+            data = FileReadString(file_handle, file_size);
+        }
+        FileClose(file_handle);
+    }
+    return data;
+}
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int init()
+{
+    return INIT_SUCCEEDED;
+}
+
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+int deinit()
+{
+    return 0;
+}
+
+//+------------------------------------------------------------------+
+//| Expert start function                                            |
+//+------------------------------------------------------------------+
+int start()
+{
+    // Aguarda os dados enviados pelo Python
+    string data_from_python = ReceiveDataFromPython();
+    
+    // Faz algum processamento com os dados (opcional)
+    // ...
+
+    // Envia uma resposta de volta para o Python
+    string response_to_python = "Hello Python!";
+    SendDataToPython(response_to_python);
+
+    return 0;
 }

@@ -16,9 +16,9 @@ y_val = val_df['Close']
 
 # Define the model
 model = Sequential([
-    Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
+    Dense(128, activation='relu', input_shape=(X_train.shape[1],)),
     Dropout(0.2),
-    Dense(64, activation='relu'),
+    Dense(128, activation='relu'),
     Dropout(0.2),
     Dense(1)
 ])
